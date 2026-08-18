@@ -9,7 +9,7 @@ const uiConfigSchema = z.object({
   chainIdsEnabled: z.array(z.number()),
 });
 
-export type UiConfig = z.infer<typeof uiConfigSchema>;
+type UiConfig = z.infer<typeof uiConfigSchema>;
 
 async function getUiConfig() {
   try {

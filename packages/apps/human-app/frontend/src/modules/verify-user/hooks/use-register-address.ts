@@ -1,11 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { t } from 'i18next';
+
 import { useAccessTokenRefresh } from '@/api/hooks/use-access-token-refresh';
 import type { ResponseError } from '@/shared/types/global.type';
 import { useWalletConnect } from '@/shared/contexts/wallet-connect';
 import { usePrepareSignature } from '@/shared/hooks';
 import { PrepareSignatureType } from '@/shared/services/signature.service';
-import * as profileService from '../services/profile.service';
+import * as verifyUserService from '../services/verify-user.service';
 import { useAuth } from '@/modules/auth/hooks/use-auth';
 
 interface RegisterAddressCallbacks {
@@ -36,7 +37,7 @@ function useRegisterAddressMutation(callbacks: RegisterAddressCallbacks) {
 
     // wallet address is part of the JWT payload
     // so we need to refresh the token after the address is registered
-    await profileService.registerAddress({ address, chainId, signature });
+    await verifyUserService.registerAddress({ address, chainId, signature });
     await refreshAccessTokenAsync({});
     updateUserData({
       wallet_address: address,

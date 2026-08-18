@@ -35,9 +35,7 @@ export function VerificationFlow({
 
   const kycStatus = user?.kyc_status as KycStatus;
 
-  const label = kycStatus
-    ? t(`worker.profile.idvStatusValues.${kycStatus}`)
-    : '';
+  const label = kycStatus ? t(`verifyUser.idvStatusValues.${kycStatus}`) : '';
   const isKycDeclined = kycStatus === KycStatus.DECLINED;
   const isKycStarted = kycStatus !== KycStatus.NONE;
 
@@ -51,7 +49,7 @@ export function VerificationFlow({
         variant="h4"
         sx={{ color: 'text.auxiliary100', mb: { xs: 2.5, md: 5 } }}
       >
-        {t('worker.profile.beforeWeGetStarted')}
+        {t('verifyUser.beforeWeGetStarted')}
       </Typography>
       <Stack
         direction="row"
@@ -87,7 +85,7 @@ export function VerificationFlow({
               mb: { xs: 3, md: 2 },
             }}
           >
-            {t('worker.profile.identityVerification')}
+            {t('verifyUser.identityVerification')}
             {isKycStarted && label && (
               <Chip
                 label={label}
@@ -115,7 +113,7 @@ export function VerificationFlow({
               mb: { xs: 3, md: 5 },
             }}
           >
-            {t('worker.profile.connectYourWallet')}
+            {t('verifyUser.connectYourWallet')}
           </Typography>
           <WalletConnectionControl />
         </>

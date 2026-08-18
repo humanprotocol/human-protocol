@@ -10,7 +10,7 @@ interface HCaptchaFormProps {
   error?: unknown;
 }
 
-export function HCaptchaForm({ name, error }: Readonly<HCaptchaFormProps>) {
+export function HCaptchaForm({ name, error }: HCaptchaFormProps) {
   const { setValue, formState } = useFormContext<Record<string, unknown>>();
   const customCaptchaRef = useRef<CustomHCaptchaRef>(null);
 

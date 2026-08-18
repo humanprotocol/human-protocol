@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, type SubmitEvent } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,9 +13,9 @@ import { env } from '@/shared/env';
 import { getErrorMessageForError } from '@/shared/errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
-import { useSignUpWorker } from '@/modules/signup/worker/hooks/use-sign-up-worker';
+import { useSignUpWorker } from './hooks/use-sign-up-worker';
 import { ApiClientError } from '@/api';
-import { signUpDtoSchema } from '../schema';
+import { signUpDtoSchema } from './schema';
 import signUpImage from '@/assets/background-images/signup-background.png';
 import { BackButton } from '@/shared/components/ui/page-card/back-button';
 import { routerPaths } from '@/router/router-paths';
@@ -28,7 +28,7 @@ import { useColorMode } from '@/shared/contexts/color-mode';
 
 function handleSignupError(unknownError: unknown) {
   if (unknownError instanceof ApiClientError && unknownError.status === 409) {
-    return t('worker.signUpForm.errors.emailTaken');
+    return t('signUpForm.errors.emailTaken');
   }
 }
 
@@ -65,7 +65,7 @@ export function SignUpPage() {
     navigate(-1);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: SubmitEvent) => {
     void methods.handleSubmit(signUp)(event);
   };
 
@@ -106,22 +106,19 @@ export function SignUpPage() {
               variant="h4"
               sx={{ color: 'text.auxiliary100' }}
             >
-              {t('worker.signUpForm.title')}
+              {t('signUpForm.title')}
             </Typography>
           </Box>
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit}>
               <Grid container sx={{ gap: 3 }}>
-                <Input
-                  label={t('worker.signUpForm.fields.email')}
-                  name="email"
-                />
+                <Input label={t('signUpForm.fields.email')} name="email" />
                 <Password
-                  label={t('worker.signUpForm.fields.password')}
+                  label={t('signUpForm.fields.password')}
                   name="password"
                 />
                 <Password
-                  label={t('worker.signUpForm.fields.confirmPassword')}
+                  label={t('signUpForm.fields.confirmPassword')}
                   name="confirmPassword"
                 />
                 <Typography
@@ -149,7 +146,7 @@ export function SignUpPage() {
                         />
                       ),
                     }}
-                    i18nKey="worker.signUpForm.termsOfServiceAndPrivacyPolicy"
+                    i18nKey="signUpForm.termsOfServiceAndPrivacyPolicy"
                   />
                 </Typography>
                 <HCaptchaForm error={error} name="hCaptchaToken" />
@@ -161,7 +158,7 @@ export function SignUpPage() {
                   fullWidth
                   loading={isLoading}
                 >
-                  {t('worker.signUpForm.submitBtn')}
+                  {t('signUpForm.submitBtn')}
                 </Button>
                 <Box sx={{ position: 'relative', width: '100%' }}>
                   <Divider sx={{ bgcolor: 'border.main' }} />
@@ -176,7 +173,7 @@ export function SignUpPage() {
                       fontWeight: 700,
                     }}
                   >
-                    {t('worker.signUpForm.or')}
+                    {t('signUpForm.or')}
                   </Typography>
                 </Box>
                 <Box
@@ -194,7 +191,7 @@ export function SignUpPage() {
                     variant="body2"
                     sx={{ color: 'text.auxiliary200' }}
                   >
-                    {t('worker.signUpForm.alreadyHaveAccount')}
+                    {t('signUpForm.alreadyHaveAccount')}
                   </Typography>{' '}
                   <Link
                     component={RouterLink}
@@ -206,7 +203,7 @@ export function SignUpPage() {
                       textDecoration: 'underline',
                     }}
                   >
-                    {t('worker.signUpForm.signIn')}
+                    {t('signUpForm.signIn')}
                   </Link>
                 </Box>
               </Grid>

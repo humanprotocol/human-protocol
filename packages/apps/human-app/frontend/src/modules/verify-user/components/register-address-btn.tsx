@@ -19,7 +19,7 @@ export function RegisterAddressBtn() {
       loading={isPending}
       onClick={mutate.bind(undefined, undefined)}
     >
-      {t('worker.profile.registerAddress')}
+      {t('verifyUser.registerAddress')}
     </Button>
   );
 }

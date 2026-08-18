@@ -5,8 +5,8 @@ import { Box, Grid, Typography } from '@mui/material';
 
 import { getErrorMessageForError } from '@/shared/errors';
 import { ApiClientError } from '@/api';
-import { useSignIn } from './use-sign-in';
-import { SignInForm } from './sign-in-form';
+import { useSignIn } from './hooks/use-sign-in';
+import { SignInForm } from './components/sign-in-form';
 import signInImage from '@/assets/background-images/signin-background.png';
 import {
   TopNotificationType,
@@ -23,7 +23,7 @@ function formattedSignInErrorMessage(
   unknownError: unknown
 ): string | undefined {
   if (unknownError instanceof ApiClientError && unknownError.status === 401) {
-    return t('worker.signInForm.errors.invalidCredentials');
+    return t('signInForm.errors.invalidCredentials');
   }
 }
 
@@ -134,7 +134,7 @@ export function SignInPage() {
               variant="h4"
               sx={{ color: 'text.auxiliary100' }}
             >
-              {t('worker.signInForm.title')}
+              {t('signInForm.title')}
             </Typography>
           </Box>
           <SignInForm

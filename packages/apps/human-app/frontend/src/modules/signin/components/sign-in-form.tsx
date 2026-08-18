@@ -11,7 +11,7 @@ import { Password } from '@/shared/components/data-entry/password';
 import { useResetMutationErrors } from '@/shared/hooks/use-reset-mutation-errors';
 import { HCaptchaForm } from '@/shared/components/hcaptcha';
 import { routerPaths } from '@/router/router-paths';
-import { type SignInDto, signInDtoSchema } from './schemas';
+import { type SignInDto, signInDtoSchema } from '../schemas';
 
 interface SignInFormProps {
   onSubmit: (data: SignInDto) => void;
@@ -47,14 +47,10 @@ export function SignInForm({
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit}>
         <Grid container sx={{ gap: 3 }}>
-          <Input
-            fullWidth
-            label={t('worker.signInForm.fields.email')}
-            name="email"
-          />
+          <Input fullWidth label={t('signInForm.fields.email')} name="email" />
           <Password
             fullWidth
-            label={t('worker.signInForm.fields.password')}
+            label={t('signInForm.fields.password')}
             name="password"
           />
           <Box sx={{ width: '100%' }}>
@@ -67,7 +63,7 @@ export function SignInForm({
                 textDecoration: 'underline',
               }}
             >
-              {t('worker.signInForm.forgotPassword')}
+              {t('signInForm.forgotPassword')}
             </MuiLink>
           </Box>
           <HCaptchaForm error={error} name="h_captcha_token" />
@@ -78,7 +74,7 @@ export function SignInForm({
             fullWidth
             loading={isLoading}
           >
-            {t('worker.signInForm.submitBtn')}
+            {t('signInForm.submitBtn')}
           </Button>
           {/* <Box sx={{ position: 'relative', width: '100%' }}>
             <Divider sx={{ bgcolor: 'border.main' }} />
@@ -93,7 +89,7 @@ export function SignInForm({
                 fontWeight: 700,
               }}
             >
-              {t('worker.signInForm.or')}
+              {t('signInForm.or')}
             </Typography>
           </Box>
           <Box
@@ -108,7 +104,7 @@ export function SignInForm({
             }}
           >
             <Typography variant="body2" sx={{ color: 'text.auxiliary200' }}>
-              {t('worker.signInForm.dontHaveAccount')}
+              {t('signInForm.dontHaveAccount')}
             </Typography>{' '}
             <MuiLink
               component={Link}
@@ -120,7 +116,7 @@ export function SignInForm({
                 textDecoration: 'underline',
               }}
             >
-              {t('worker.signInForm.signUp')}
+              {t('signInForm.signUp')}
             </MuiLink>
           </Box> */}
         </Grid>

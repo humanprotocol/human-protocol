@@ -6,7 +6,7 @@ import {
 } from './http-api-client';
 import { AuthService, type AuthProvider } from './auth-service';
 
-export class AuthorizedHttpApiClient extends HttpApiClient {
+class AuthorizedHttpApiClient extends HttpApiClient {
   constructor(
     baseUrl: string,
     private readonly authProvider: AuthProvider
