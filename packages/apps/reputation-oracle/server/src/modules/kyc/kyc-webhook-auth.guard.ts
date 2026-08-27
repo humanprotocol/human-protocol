@@ -10,6 +10,7 @@ import {
 import { Request } from 'express';
 
 import { KycConfigService } from '@/config';
+import * as securityUtils from '@/utils/security';
 
 @Injectable()
 export class KycWebhookAuthGuard implements CanActivate {
@@ -18,12 +19,17 @@ export class KycWebhookAuthGuard implements CanActivate {
     const request: Request = context.switchToHttp().getRequest();
 
     const { headers, body } = request;
-    const apiKey = headers['x-auth-client'];
     const hmacSignature = headers['x-hmac-signature'];
 
     if (!hmacSignature) {
       throw new HttpException(
         'HMAC Signature not provided',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (typeof hmacSignature !== 'string') {
+      throw new HttpException(
+        'Invalid HMAC Signature type',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -35,10 +41,7 @@ export class KycWebhookAuthGuard implements CanActivate {
       .update(JSON.stringify(body))
       .digest('hex');
 
-    if (
-      signedPayload !== hmacSignature ||
-      this.kycConfigService.apiKey !== apiKey
-    ) {
+    if (!securityUtils.safeCompare(signedPayload, hmacSignature)) {
       throw new HttpException(
         'HMAC Signature does not match',
         HttpStatus.UNAUTHORIZED,
