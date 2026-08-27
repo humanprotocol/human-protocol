@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 import * as bcrypt from 'bcrypt';
 
 export function hashPassword(password: string): string {
@@ -11,4 +13,16 @@ export function comparePasswordWithHash(
   passwordHash: string,
 ): boolean {
   return bcrypt.compareSync(password, passwordHash);
+}
+
+export function safeCompare(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+
+  // Must be same length to avoid early return timing leaks
+  if (bufA.length !== bufB.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(bufA, bufB);
 }
